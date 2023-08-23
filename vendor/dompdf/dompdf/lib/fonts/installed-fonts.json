@@ -1,0 +1,9 @@
+{
+    "ubuntu": {
+        "300_italic": "D:\\xampp\\htdocs\\karl-amy\\admin\\vendor\\dompdf\\dompdf\/lib\/fonts\/ubuntu_300_italic_b8fe9e8d47652aef8a27f80ec07e6de9",
+        "300": "D:\\xampp\\htdocs\\karl-amy\\admin\\vendor\\dompdf\\dompdf\/lib\/fonts\/ubuntu_300_78caa070e669b23c12005b68678fc64d",
+        "normal": "D:\\xampp\\htdocs\\karl-amy\\admin\\vendor\\dompdf\\dompdf\/lib\/fonts\/ubuntu_normal_a9b4465f75f1e035e352908784fee311",
+        "500": "D:\\xampp\\htdocs\\karl-amy\\admin\\vendor\\dompdf\\dompdf\/lib\/fonts\/ubuntu_500_77b379fb022b48e8a5f4b688af8ca205",
+        "bold": "ubuntu_bold_01f1f5adaa8ee473febf98094d81e93b"
+    }
+}

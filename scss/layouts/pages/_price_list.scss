@@ -1,0 +1,86 @@
+.price-list{
+    h2{
+        display: flex;
+        gap: $spacer-1;
+        align-items: center;
+    }
+
+}
+///services card for price list
+.service-card{
+    display: flex;
+    width: 100%;
+    max-width: 500px;
+}
+//left hand banner, displays status of items
+.service-card-banner{
+    border: 1px solid $primary;
+    border-top-left-radius: $border-radius;
+    border-bottom-left-radius: $border-radius;
+    $padding: $spacer-2;
+    background-color: $primary;
+    color: $primary-950;
+    writing-mode: vertical-lr;
+    text-orientation: upright;
+    text-align: center;
+    min-width: $fs-150;
+}
+.service-card-banner[data-promo="Yes"]{
+    background-color: #5A99B0;
+    border: 1px solid #5A99B0;
+}
+.service-card-body{
+    padding: $spacer-3 $spacer-2 ;
+    border-block: 1px solid $primary;
+    border-right: 1px solid $primary;
+    width: 100%;
+}
+.service-card-heading{
+    text-align: center;
+    text-decoration: none;
+    
+}
+.service-card-price{
+    font-size: $fs-125;
+    font-weight: 700;
+}
+.service-card-actions{
+    background-color: $primary-950;
+    padding: $spacer-2;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+.service-card-featured{
+    border-radius: 5px;
+    padding: $spacer-2;
+    color: $primary-950;
+}
+.service-card-featured[data-featured="Yes"]{
+    background-color: #5FBABA;
+}
+
+//card for editing services
+.service-card-edit{
+    border: 1px solid $primary;
+
+}
+
+.service-card-edit-header{
+    display: flex;
+    gap: $spacer-2;
+    .service-card-banner{
+        border: 1px solid $primary;
+        border-radius: $border-radius;
+        padding: $spacer-2;
+        background-color: $primary;
+        color: $primary-950;
+        writing-mode: inherit;
+        text-orientation: mixed;
+        text-align: left;
+    }
+    .service-card-banner[data-promo="Yes"]{
+        background-color: #5A99B0;
+        border: 1px solid #5A99B0;
+    }
+}

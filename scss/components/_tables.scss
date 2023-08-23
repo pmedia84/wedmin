@@ -1,0 +1,118 @@
+.table-wrapper {
+    //wraps table to make it responsive
+    overflow-x: auto;
+    max-width: 90vw;
+
+    @media(min-width:$md) {
+        max-width: 100%;
+    }
+}
+
+.std-table {
+    //standard table settings
+
+    width: 100%;
+    margin-bottom: $spacer-3;
+    border-collapse: collapse;
+
+    th {
+        text-align: left;
+    }
+
+    td {
+        border-bottom: 1px solid $primary;
+    }
+
+    tr:nth-child(even) {
+        background-color: $primary-900;
+    }
+
+}
+
+
+.meal-choices {
+
+    width: 100%;
+    margin-bottom: $spacer-3;
+    border-collapse: collapse;
+
+    th {
+        text-align: left;
+        background-color: $primary-900;
+        padding: $spacer-2;
+
+        &:first-of-type {
+            border-top-left-radius: 5px;
+        }
+
+        &:last-of-type {
+            border-top-right-radius: 5px;
+        }
+    }
+
+    td {
+        padding: $spacer-2
+    }
+
+}
+
+.guest-name-col {
+    background-color: $primary-950;
+    border-bottom: 2px double $primary;
+
+}
+
+
+//table for guest submissions on gallery page
+.submission-table {
+    width: 100%;
+
+    tr:nth-child(2n) {
+        background-color: white;
+    }
+
+    .status[data-status="Awaiting"] {
+        display: block;
+        background-color: $red-primary;
+        padding: $spacer-1;
+        border-radius: $border-radius;
+        width: fit-content;
+    }
+
+    .status[data-status="Partial"] {
+        display: block;
+        background-color: $primary-800;
+        padding: $spacer-1;
+        border-radius: $border-radius;
+        width: fit-content;
+    }
+}
+
+//?new guest list table
+.guest-list{
+    tr{
+        border-bottom: 1px solid $primary;
+       
+    }
+    tr:first-of-type{
+        border-bottom: 2px solid $primary;
+        position: sticky;
+        top: 0;
+    }
+    width: 100%;
+    margin-bottom: $spacer-3;
+    border-collapse: collapse;
+    th {
+        text-align: left;
+    }
+    td{
+        padding-block: $spacer-2;
+    }
+    tr .guest{
+       display: flex;
+       flex-direction: column;
+    }
+    tr .guest_name{
+        font-weight: 800;
+    }
+}

@@ -1,0 +1,56 @@
+//? General Toolbar that is sticky and will fix to top pf screen on wide screens and on the bottom for mobiles.
+//menu footer for bottom of small screens
+.toolbar{
+    background-color: $primary-950;
+    position: sticky;
+    top: env(safe-area-inset-top, 5px);
+    left: 5px;
+    right: 5px;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    flex-wrap: wrap;
+    .btn-primary{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: .8em;
+
+    }
+}
+
+
+@media(min-width: $md){
+    .toolbar{
+        position: sticky;
+        top: 5px;
+        justify-content: left;
+        align-items: end;
+        .btn-primary{
+            font-size: 1em;
+            flex-direction: row;
+            .icon{
+                margin-right: $spacer-2;
+            }
+        }
+    }
+}
+
+///toolbar for forms page
+.forms-toolbar{
+gap: $spacer-3;
+padding: $spacer-2;
+border-radius: $border-radius;
+background-color: $primary-900;
+.search-input {
+    .btn-primary{
+        display:unset ;
+    }
+    .icon{
+        margin: 0;
+
+    }
+}
+
+}

@@ -1,0 +1,84 @@
+.header {
+    //header panel with welcome message and header actions
+    color: $primary;
+    //margin-block: $spacer-2;
+}
+
+.header-actions {
+    //top banner with immediate actions for user
+    background-color: $primary-900;
+    border-radius: 10px;
+    padding: .25rem .5rem;
+}
+
+.header-actions-btn-section {
+    //button container
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header-actions-navbtn, .header-actions-btn-logout{
+
+    outline: 2px solid transparent;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    transition: outline 300ms ease-out;
+    font-size: 2rem;
+    .icon{
+        fill: $primary;
+        transition: fill 300ms ease-out;
+    }
+    &:focus, &:focus-within{
+        outline: 2px solid $primary;
+        transition: outline 300ms ease-out;
+        .icon{
+            fill: $primary-500;
+            transition: fill 300ms ease-out;
+        }
+    }
+}
+
+.header-actions-btn-user{
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    background-color: transparent;
+    border: none;
+    border-radius: 5px;
+    transition: outline 300ms ease-out;
+    font-size: 1.75rem;
+    display: flex;
+    align-items: flex-end;
+    .icon{
+        fill: $primary;
+        opacity: 1;
+        transition: opacity 300ms ease-out;
+    }
+    .down{
+        height: .65em;
+        transform: rotate(0);
+        transition: transform 300ms ease-out;
+    }
+    &:focus, &:focus-within{
+        outline: 2px solid $primary;
+        transition: outline 300ms ease-out;
+        .icon{
+            opacity: .8;
+            transition: opacity 300ms ease-out;
+        }
+        .down{
+            transform: rotate(180deg);
+            transition: transform 300ms ease-in-out;
+        }
+    }
+}
+.header-actions-business-name {
+    display: none;
+}
+
+
+.login-header{//login page header with logo
+    img{
+        height: 70px;
+    }
+}

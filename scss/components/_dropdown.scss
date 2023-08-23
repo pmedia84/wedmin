@@ -1,0 +1,17 @@
+///dropdown menu
+.dropdown{
+    position: relative;
+}
+.dropdown ul{
+    position: absolute;
+    bottom: -100px;
+    right: 0;
+    padding: $spacer-3;
+    background-color: $primary-950;
+    margin: 0;
+    width: max-content;
+    border-radius: $border-radius-2;
+    box-shadow: 2px 2px 4px rgb(145, 145, 145);
+    display: none;
+}
+

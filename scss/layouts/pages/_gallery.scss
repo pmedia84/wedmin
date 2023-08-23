@@ -1,0 +1,131 @@
+//? Image cards for gallery pages
+.img-card {
+    position: relative;
+    height: 250px;
+  }
+  
+  .img-card-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(255, 255, 255, 0.61);
+    padding: $spacer-2;
+    font-size: $fs-100;
+    text-align: center;
+  }
+  ///*  image gallery cards
+.img-card{
+    .btn-edit{
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 2;
+      padding: $spacer-1;
+      svg{
+        margin: 0;
+      }
+    }
+    img{
+      scale: 1;
+      transition: scale 300ms ease-out;
+      cursor: default;
+    }
+  
+   border: 2px solid transparent;
+   background-color: #fff;
+   transition: border 300ms ease-out, opacity 300ms ease-out, background-color 300ms ease-out;
+   &:focus, &:hover,  &:focus-within{
+    border: 2px solid $primary;
+    opacity: 1;
+    transition: border 300ms ease-out, opacity 300ms ease-out, background-color 300ms ease-out;
+    
+   }
+  }
+ 
+  //checkbox styling
+
+  .img-select{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: $spacer-2;
+    font-size: $fs-100;
+    text-align: center;
+    border: 1px solid $primary-form;
+    color: $primary-form;
+    width: 1.5em !important;
+    height: 1.5em !important;
+    z-index: 2;
+    &::before{
+      width: .75em !important;
+      height: .75em !important;
+    }
+  }
+  
+  .img-checked{
+    opacity: .9;
+    border: 2px solid $primary;
+    background-color: $primary;
+    transition: opacity 300ms ease-out, border 300ms ease-out, background-color 300ms ease-out;
+    img{
+      scale: .9;
+      transition: scale 300ms ease-out;
+    }
+  }
+  //show the tick to state the image has been approved
+  .img-card[data-status="Approved"]{
+    
+    .img-status{
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: rgba(255, 255, 255, 0.51);
+      backdrop-filter: blur(4px);
+      padding: $spacer-2;
+      font-size: $fs-100;
+      text-align: center;
+      border: 1px solid $primary-form;
+      color: $primary-form;
+      z-index: 2;
+    }
+  }
+  .gallery-img {
+    cursor: pointer;
+  
+  }
+  
+  .gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .gallery-card {
+    border-radius: $border-radius;
+    background-color: #fff;
+    padding: $spacer-2;
+  
+  
+  }
+.delete-thumb {
+    //thumbnail for delete page
+    height: 150px;
+}
+
+///gallery-controls
+.gallery-controls {
+    display: flex;
+    flex-direction: column;
+    gap: $spacer-2;
+
+}
+
+@media(min-width: $md) {
+    .gallery-controls {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
