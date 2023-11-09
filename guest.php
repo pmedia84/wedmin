@@ -2,9 +2,11 @@
 session_start();
 require("scripts/functions.php");
 check_login();
-include("connect.php");
-include("inc/head.inc.php");
-include("inc/settings.php");
+$cms = new Cms();
+$cms->setup();
+$user = new User();
+//connect to DB
+db_connect($db);
 
 //guest variable, only required for edit and view actions
 if ($_GET['action'] == "edit" || $_GET['action'] == "view" || $_GET['action'] == "delete") {
@@ -28,15 +30,11 @@ $wedding_events_query = ('SELECT * FROM wedding_events ORDER BY event_time');
 $wedding_events = $db->query($wedding_events_query);
 $wedding_events_result = $wedding_events->fetch_assoc();
 ?>
-<!-- Meta Tags For Each Page -->
-<meta name="description" content="Parrot Media - Client Admin Area">
-<meta name="title" content="Manage your website content">
-<!-- /Meta Tags -->
+<!DOCTYPE html>
+<html lang="en">
 
-<!-- / -->
-<!-- Page Title -->
-<title>Mi-Admin | Manage Guest</title>
-<!-- /Page Title -->
+<head>
+    <?php include("./inc/Page_meta.php"); ?>
 </head>
 
 <body>
@@ -111,7 +109,7 @@ $wedding_events_result = $wedding_events->fetch_assoc();
                                 if (mysqli_query($db, $remove_user)) {
                                     echo mysqli_error($db);
                                 }
-                                //remove any guests this user has made and if they are a group organiser
+                                //remove any guests this user has and if they are a group organiser
                                 if ($guest_type == "Group Organiser") {
                                     $remove_group_guests = "DELETE FROM guest_list WHERE guest_group_id=$guest_group_id";
                                     if (mysqli_query($db, $remove_group_guests)) {
@@ -341,7 +339,7 @@ $wedding_events_result = $wedding_events->fetch_assoc();
                                         <p>The guest group that <?= $guest_fname; ?> is organising.</p>
 
                                         <table class="std-table">
-
+                                        
                                             <tr>
                                                 <th>Name</th>
                                                 <th>Manage</th>
@@ -638,25 +636,7 @@ $wedding_events_result = $wedding_events->fetch_assoc();
     </script>
     <script>
         //script for adding a guest
-        $("#save-and-new").on("click", function(event) {
-            event.preventDefault();
-            var formData = new FormData($("#add_guest").get(0));
-            formData.append("action", "create");
-            $.ajax({ //start ajax post
-                type: "POST",
-                url: "scripts/guest.script.php",
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(data, responseText) {
-                    if (data === "success") {
-                        window.location.replace('guest?action=create');
-                    }
 
-                }
-            });
-
-        });
     </script>
     <script>
         $("#show_address").on("click", function() {

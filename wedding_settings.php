@@ -7,16 +7,19 @@ include("inc/settings.php");
 $guest_home_img = ('SELECT * FROM images WHERE image_placement ="Guest Home"');
 $guest_home_img = $db->query($guest_home_img);
 $guest_home_img_res = $guest_home_img->fetch_assoc();
-include("inc/head.inc.php");
+//page meta variables
+$meta_description = "Parrot Media - Client Admin Area";
+$meta_page_title = "Mi-Admin | News";
 ?>
-<!-- Meta Tags For Each Page -->
-<meta name="description" content="Parrot Media - Client Admin Area">
-<meta name="title" content="Manage your website content">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<?php include("./inc/Page_meta.php");?>
 
-<title>Mi-Admin | Wedding Website Settings</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0/dist/themes/light.css" />
 <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0/dist/shoelace.js"></script>
 </head>
+
 
 <body>
     <!-- Main Body Of Page -->

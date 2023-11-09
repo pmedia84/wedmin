@@ -56,10 +56,11 @@
 ///Form wrapper to wrap login and password reset  forms in etc
 .login-wrapper {
     border-radius: $border-radius;
+    border: 1px solid $primary;
     background-color: white;
     padding: $spacer-4;
     width: 95%;
-    max-width: 600px;
+    max-width: 450px;
     margin: 0 auto;
     margin-block: $spacer-3;
     place-self: center;
@@ -105,11 +106,9 @@ input[type=search] {
         transition: box-shadow 300ms ease-out;
     }
 
-    max-width: 80vw;
+    max-width: 25em;
 
-    @media(min-width:$md) {
-        max-width: 80%;
-    }
+
 }
 
 input[type=date],
@@ -131,7 +130,10 @@ textarea {
         height: 100%;
     }
 }
-
+.input-error{//modifier class for input errors with empty fields
+    background-color: $error-response;
+    color: #fff;
+}
 select {
     display: block;
     width: min-content;
@@ -144,7 +146,7 @@ select {
     background-image: url("../img/icons/down.svg");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
-    background-size: 16px 12px;
+    background-size: 16px 16px;
 
     &:focus {
         outline: none;

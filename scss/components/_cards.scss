@@ -31,9 +31,7 @@
     background-color: white;
     padding: $spacer-1;
     border-radius: 5px;
-    @media(min-width:$md){
-        padding: $spacer-3;
-    }
+
 }
 
 
@@ -134,14 +132,7 @@
     margin-block: $spacer-3;
 }
 
-/////Reviews
-.star-color{//review stars unrated
-    color: rgba(207, 207, 207, 0.514);
-    font-size: 1rem;
-}
-.star-color-rated{//review stars rated
-    color: #f9b805;
-}
+
 
 //event cards, used in wedding events pages
 .event-card{
@@ -234,7 +225,7 @@
     position: fixed;
     right: 25px;
     top: 50px;
-    z-index: 1000;
+    z-index: 2000;
 }
 .response-card{
     padding-block: $spacer-3;
@@ -248,6 +239,9 @@
 }
 .response-card-icon{
     padding-inline: $spacer-2;
+    display: grid;
+    place-items: center;
+    font-size: 2rem;
     svg path{
         fill: $primary;
     }

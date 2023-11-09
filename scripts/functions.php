@@ -1,139 +1,125 @@
 <?php
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+require $_SERVER['DOCUMENT_ROOT'] . '/wedmin/mailer/PHPMailer.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/wedmin/mailer/SMTP.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/wedmin/mailer/Exception.php';
 function check_login()
 {
     if (!isset($_SESSION['loggedin'])) {
         $location = urlencode($_SERVER['REQUEST_URI']);
-        header("Location: login.php?location=" . $location);
+        header("Location: login?location=" . $location);
     }
+}
+//# connect to database function
+function db_connect(&$db)
+{
+    $code = 200;
+    $msg = "";
+    $config_file = $_SERVER['DOCUMENT_ROOT'] . "/config.json";
+    //! check file exists
+    if (!file_exists($config_file)) {
+        $code = 404;
+        $msg = "Config file not found";
+        echo $code . " " . $msg;
+        exit;
+    }
+    $config = file_get_contents($config_file);
+    //decode json file
+    $file = json_decode($config, TRUE);
+    $DATABASE_HOST = $file['wedmin_db']['db_host'];
+    $DATABASE_USER = $file['wedmin_db']['db_user'];
+    $DATABASE_PASS = $file['wedmin_db']['db_pw'];
+    $DATABASE_NAME = $file['wedmin_db']['db_name'];
+    $db = mysqli_connect($DATABASE_HOST, $DATABASE_USER, $DATABASE_PASS, $DATABASE_NAME,);
 }
 
 class Cms
 {
-    public $cms_type;
-    //?variables for wedding CMS
+    //?variables 
     public $wedding_name;
     public $wedding_date;
     public $wedding_id;
     public $wedding_time;
-    //?
-    //?Variables for business CMS
-    public $business_id;
-    public $business_name;
-    public $business_tel;
-    public $business_email;
-    public $business_contact;
-    //?
-    //*return the type of cms
-    function type()
+    public $api_status;
+    function __construct()
     {
-        //find the cms type first
-        include("../connect.php");
-        $cms_q = $db->query('SELECT cms_type FROM settings');
-        $cms_r = mysqli_fetch_assoc($cms_q);
-        $this->cms_type = $cms_r['cms_type'];
-        return $this->cms_type;
+        db_connect($db);
+        $q = $db->query('SELECT wedding_name FROM wedding');
+        if ($q->num_rows > 0) {
+            $r = mysqli_fetch_assoc($q);
+            $this->wedding_name = $r['wedding_name'];
+        } else {
+            return;
+        }
+    }
+    //load the api and active modules loads from remote server location and updates the local database on each login
+
+    function api_connect()
+    {
+        $code = 200;
+        $msg = "";
+        //load the api key from Database
+        db_connect($db);
+        $q = $db->query("SELECT api_status, api_key FROM api_key");
+        if ($q->num_rows > 0) {
+            $r = mysqli_fetch_assoc($q);
+            $api_key = $r['api_key'];
+            $api = file_get_contents("https://api.parrotmedia.co.uk/api_key.php?api_key=" . $api_key);
+            $response = json_decode($api, TRUE);
+            //update database with api status and set the api status in this class
+            $this->api_status = $response['api_status'];
+            //print_r($response);
+            //check if there are modules set up for this cms
+            if (isset($response['modules'])) {
+                //update module status
+                $module_u = $db->prepare("UPDATE modules SET module_status=? WHERE module_id=?");
+                foreach ($response['modules'] as $module) {
+                    $module_q = $db->query("SELECT module_name, module_id, module_status FROM modules WHERE module_name ='" . $module['module_name'] . "'");
+
+                    //check if the module is in the db or not
+                    if ($module_q->num_rows > 0) {
+                        $module_r = mysqli_fetch_assoc($module_q);
+                        //if the module matches the list, then update the record with correct status
+                        $module_u->bind_param("si", $module['module_status'], $module_r['module_id']);
+                        $module_u->execute();
+                    }
+                }
+                $module_u->close();
+            } else {
+                //modules not set up
+                $this->api_status = 500;
+            }
+        } else {
+            //api key not found
+            $this->api_status = 404;
+        }
+    }
+    function api_status()
+    {
+        return $this->api_status;
+    }
+    function w_name()
+    {
+        return $this->wedding_name;
     }
 
     function setup()
-    { 
-        include("../connect.php");
-        //business
-        if ($this->cms_type == "Business") {
-            //look for a business setup in the db, if not then direct to the setup page
-            $business_query = ('SELECT business_id FROM business');
-            $business = $db->query($business_query);
-            if ($business->num_rows == 0) {
-                header('Location: setup.php?action=setup_business');
-                return;
-            }
-            //check that there are users set up 
-            $business_user_query = ('SELECT * FROM business_users');
-            $business_user = $db->query($business_user_query);
-            if ($business_user->num_rows < 2) {
-                header('Location: setup.php?action=check_users_business');
-                return;
-            }
-        }
-        //wedding
-        if ($this->cms_type == "Wedding") {
-            //look for a wedding setup in the db, if not then direct to the setup page
-            $wedding_query = ('SELECT wedding_id FROM wedding');
-            $wedding = $db->query($wedding_query);
-            if ($wedding->num_rows == 0) {
-                header('Location: setup.php?action=setup_wedding');
-            }
-            //check that there are users set up 
-            $wedding_user_query = ('SELECT wedding_user_id FROM wedding_users ');
-            $wedding_user = $db->query($wedding_user_query);
-            if ($wedding_user->num_rows < 2) {
-                header('Location: setup.php?action=check_users_wedding');
-            }
-            $db->close();
+    {
+        //load cms and check it is set up, if not redirect to setup page
+        db_connect($db);
+        $q = $db->query('SELECT wedding_id FROM wedding');
+        if ($q->num_rows > 0) {
+            $r = mysqli_fetch_assoc($q);
+        } else {
+            header("Location: setup?action=setup_wedding");
         }
     }
-    //load wedding info
-    function wedding_load()
-    {
-        include("../connect.php");
-        $wedding_q = $db->query('SELECT * FROM wedding');
-        $wedding_r = mysqli_fetch_assoc($wedding_q);
-        $name = $wedding_r['wedding_name'];
-        $date = $wedding_r['wedding_date'];
-        $id = $wedding_r['wedding_id'];
-        $this->wedding_name = $name;
-        $this->wedding_date = $date;
-        $this->wedding_id = $id;
-    }
-    //load business info
-    function business_load()
-    {
-        include("../connect.php");
-        $business_q = $db->query('SELECT * FROM business');
-        $business_r = mysqli_fetch_assoc($business_q);
-        $name = $business_r['business_name'];
-        $this->business_name = $name;
-    }
-
-    //* Return all info for wedding
-    function w_name(){
-        return $this->wedding_name;
-    }
-    function w_date(){
-        return $this->wedding_date;
-    }
-    function w_id(){
-        return $this->wedding_id;
-    }
-
-    //*return all business info
-    function b_name(){
-        return $this->business_name;
-    }
 }
 
-
-
-function cms_type()
-{
-    include("../connect.php");
-    $cms_q = $db->query('SELECT cms_type FROM settings');
-    $cms_r = mysqli_fetch_assoc($cms_q);
-    $cms_type = $cms_r['cms_type'];
-    return $cms_type;
-}
-//loads basic information for the wedding
-function wedding_load(&$wedding_name, &$wedding_date, &$wedding_id)
-{
-    include("../connect.php");
-    $wedding_q = $db->query('SELECT * FROM wedding');
-    $wedding_r = mysqli_fetch_assoc($wedding_q);
-    $wedding_name = $wedding_r['wedding_name'];
-    $wedding_date = $wedding_r['wedding_date'];
-    $wedding_id = $wedding_r['wedding_id'];
-    if ($wedding_q->num_rows == 0) {
-        header("Location: setup.php?action=setup_wedding");
-    }
-}
 class Module
 {
 
@@ -170,9 +156,6 @@ $image_gallery->module_name("Image Gallery");
 $events = new Module();
 $events->module_name("Events");
 
-$price_list = new Module();
-$price_list->module_name("Price List");
-
 $invite_manager = new Module();
 $invite_manager->module_name("Invite Manager");
 
@@ -191,9 +174,6 @@ $meal_choices_m->module_name("Meal Choices");
 $guest_image_gallery = new Module();
 $guest_image_gallery->module_name("Guest Image Gallery");
 
-$reviews = new Module();
-$reviews->module_name("Reviews");
-
 $forms = new Module();
 $forms->module_name("Forms");
 
@@ -210,7 +190,7 @@ class Wedding_module
     }
     function status()
     {
-        include("../connect.php");
+        db_connect($db);
         $modules_query = $db->query('SELECT wedding_module_status FROM wedding_modules WHERE wedding_module_name= "' . $this->name . '"');
         $modules_r = mysqli_fetch_assoc($modules_query);
         $module_status = $modules_r['wedding_module_status'];
@@ -236,7 +216,19 @@ class User
     public $user_type;
     public $user_name;
     public $logged_in;
+    public $user_email;
+    public $user_em_status;
 
+    function em_status()
+    {
+        //find email status of the user
+        db_connect($db);
+        $q = $db->query("SELECT user_em_status FROM users WHERE user_id=" . $this->user_id() . "");
+        $r = mysqli_fetch_assoc($q);
+        $status = $r['user_em_status'];
+        $this->user_em_status = $status;
+        return $this->user_em_status;
+    }
     function user_id()
     {
         $this->user_id = $_SESSION['user_id'];
@@ -249,14 +241,151 @@ class User
     }
     function user_type()
     {
-        include("../connect.php");
+        db_connect($db);
         $user_type_q = $db->query("SELECT user_type FROM users WHERE user_id=" . $this->user_id() . "");
         $user_type_r = mysqli_fetch_assoc($user_type_q);
         $type = $user_type_r['user_type'];
         $this->user_type = $type;
         return $this->user_type;
     }
+    function name()
+    {
+        db_connect($db);
+        $q = $db->query("SELECT user_name FROM users WHERE user_id=" . $this->user_id() . "");
+        $r = mysqli_fetch_assoc($q);
+        $name = $r['user_name'];
+        $this->user_name = $name;
+        return $this->user_name;
+    }
+    function update()
+    {
+        $email = $_POST['user_email'];
+        $user_name = $_POST['user_name'];
+        //url for confirming new emails
+        $url = $_SERVER['SERVER_NAME'] . "/admin/profile.php?confirm=email";
+
+        //update user details from form
+        db_connect($db);
+        //check if new email is different to saved email
+        $q = $db->query("SELECT user_email FROM users WHERE user_id=" . $this->user_id() . "");
+        $r = mysqli_fetch_assoc($q);
+        $old_email = $r['user_email'];
+        if ($old_email != $email) {
+            //load email config file
+            //config file name
+            $config_file = "config.json";
+            //load config file
+            $config = file_get_contents($config_file);
+            //decode json file
+            $file = json_decode($config, TRUE);
+            //set up variables
+            $host = $file['email_config']['host'];
+            $username = $file['email_config']['username'];
+            $pw = $file['email_config']['pw'];
+            $fromname = $file['email_config']['fromname'];
+            //send email to get user to confirm email
+            //set the user email status to unconfirmed
+            $em_status = "TEMP";
+            //load template
+            $body = file_get_contents("inc/User_update_email.html");
+            //set up email
+            $body = str_replace(["{{user_name}}"], [$user_name], $body);
+            $body = str_replace(["{{user_email}}"], [$email], $body);
+            $body = str_replace(["{{url}}"], [$url], $body);
+            //* Subject
+            $subject = "New email address";
+            $fromserver = $username;
+            $email_to = $email;
+            $mail = new PHPMailer(true);
+            $mail->IsSMTP();
+            $mail->Host = $host; // Enter your host here
+            $mail->SMTPAuth = true;
+            $mail->Username = $username; // Enter your email here
+            $mail->Password = $pw; //Enter your password here
+            $mail->Port = 25;
+            $mail->From = $username;
+            $mail->FromName = $fromname;
+            $mail->Sender = $fromserver; // indicates ReturnPath header
+            $mail->Subject = $subject;
+            $mail->Body = $body;
+            $mail->IsHTML(true);
+            $mail->AddAddress($email_to);
+            if (!$mail->Send()) {
+                echo "Mailer Error: " . $mail->ErrorInfo;
+            }
+        }
+        $update = $db->prepare("UPDATE users SET user_email=?, user_name=?, user_em_status=? WHERE user_id=?");
+        $update->bind_param("sssi", $email, $user_name, $em_status,  $this->user_id);
+        $update->execute();
+        $update->close();
+    }
+    function verify_email()
+    {
+        //update users table email as set
+        include("connect.php");
+        $update = $db->prepare("UPDATE users SET user_em_status=? WHERE user_id=?");
+        $this->user_em_status = "SET";
+        $update->bind_param("si", $this->user_em_status,  $this->user_id);
+        $update->execute();
+        $update->close();
+    }
+    function new_pw($user_id, $pw)
+    {
+        //new password function
+        $code = 200;
+        include("../connect.php");
+        $update = $db->prepare("UPDATE users SET user_pw=? WHERE user_id=?");
+        $pw = password_hash($pw, PASSWORD_DEFAULT);
+        $update->bind_param("si", $pw, $user_id);
+        $update->execute();
+
+
+        // find user email
+        $q = $db->query("SELECT user_email, user_name FROM users WHERE user_id=" . $user_id);
+        $r = mysqli_fetch_assoc($q);
+        $email = $r['user_email'];
+        $user_name = $r['user_name'];
+        //load email config file
+        //config file name
+        $config_file = "../config.json";
+        //load config file
+        $config = file_get_contents($config_file);
+        //decode json file
+        $file = json_decode($config, TRUE);
+        //set up variables
+        $host = $file['email_config']['host'];
+        $username = $file['email_config']['username'];
+        $db_pw = $file['email_config']['pw'];
+        $fromname = $file['email_config']['fromname'];
+        //load template
+        $body = file_get_contents("../inc/User_update_pw.html");
+        //set up email
+        $body = str_replace(["{{user_name}}"], [$user_name], $body);
+        $subject = "New password";
+        $fromserver = $username;
+        $email_to = $email;
+        $mail = new PHPMailer(true);
+        $mail->IsSMTP();
+        $mail->Host = $host; // Enter your host here
+        $mail->SMTPAuth = true;
+        $mail->Username = $username; // Enter your email here
+        $mail->Password = $db_pw; //Enter your password here
+        $mail->Port = 25;
+        $mail->From = $username;
+        $mail->FromName = $fromname;
+        $mail->Sender = $fromserver; // indicates ReturnPath header
+        $mail->Subject = $subject;
+        $mail->Body = $body;
+        $mail->IsHTML(true);
+        $mail->AddAddress($email_to);
+        if (!$mail->Send()) {
+            echo "Mailer Error: " . $mail->ErrorInfo;
+        }
+        $response = array("response_code" => $code);
+        echo json_encode($response);
+    }
 }
+
 
 //image class for all image operations
 class Img
@@ -549,4 +678,401 @@ class Img
     {
         return $this->success_img;
     }
+}
+
+//guest class for all guest operations
+class Guest
+{
+    public $guest_fname;
+    public $guest_sname;
+    public $guest_email;
+    public $guest_address;
+    public $guest_postcode;
+    public $guest_extra_invites;
+    public $rsvp_code;
+    public $guest_type;
+    public $rsvp_status;
+    public $guest_id;
+    public $guest_group_id;
+    //The event that the guest is associated with 
+    public $event_id;
+    //server response array, echo out as a JSON file
+    public $response;
+
+    //response code
+    public $code;
+    public $response_message = "";
+    function __construct()
+    {
+        //set extra invites to zero until guest group has been added
+        $this->guest_extra_invites = 0;
+        //Set as a sole guest, change if guest has additional invites
+        $this->guest_type = "Sole";
+        //set RSVP status, if it has been changed in the form by the user then change it as per the post
+        if(isset($_POST['rsvp_status']) && $_POST['rsvp_status']!=0){
+            $this->rsvp_status=$_POST['rsvp_status'];
+        }else{
+            $this->rsvp_status = "Not Replied";
+        }
+        
+        //set guest ID if POST variable is available and find any events they are associated with
+        if (isset($_POST['guest_id'])) {
+            $this->guest_id = $_POST['guest_id'];
+            //find if this guest is associated with an event or not
+            db_connect($db);
+            $q = $db->query("SELECT guest_id, event_id FROM invitations WHERE guest_id=" . $this->guest_id);
+            if($q->num_rows>0){
+                $r=mysqli_fetch_assoc($q);
+                $this->event_id=$r['event_id'];
+            }else{
+                $this->event_id=0;
+            }
+        }
+        //set guest group ID if POST variable exists
+        if (isset($_POST['guest_group_id'])) {
+            $this->guest_group_id = $_POST['guest_group_id'];
+        }
+    }
+    function create()
+    {
+
+        //make sure the required fields have been filled out and JS has not been altered
+        if (!trim($_POST['guest_fname'])) {
+            $this->code = 500;
+            $this->response_message = "First name is required";
+            $this->response = json_encode(array("response_code" => $this->code, "response_message" => $this->response_message));
+            return $this->response;
+            exit;
+        }
+        if (!trim($_POST['guest_sname'])) {
+            $this->code = 500;
+            $this->response_message = "Surname is required";
+            $this->response = json_encode(array("response_code" => $this->code, "response_message" => $this->response_message));
+            return $this->response;
+            exit;
+        }
+        //create a new Guest
+        db_connect($db);
+        //determine variables
+        $this->guest_fname = mysqli_real_escape_string($db, $_POST['guest_fname']);
+        $this->guest_sname = mysqli_real_escape_string($db, $_POST['guest_sname']);
+        $this->guest_email = mysqli_real_escape_string($db, $_POST['guest_email']);
+        $this->guest_address = htmlspecialchars($_POST['guest_address']);
+        $this->guest_postcode = mysqli_real_escape_string($db, $_POST['guest_postcode']);
+        //create an RSVP CODE
+        $random_code = rand(1000, 20000);
+        //take first letter of surname
+        $code_name = mb_substr($_POST['guest_sname'], 0, 1);
+        //convert to upper case
+        $code_name = strtoupper($code_name);
+        //compile code and save in class variable
+        $this->rsvp_code = $code_name . $random_code;
+
+        //if the guest has 1 or more extra invites then add them as a group organiser
+        if (isset($_POST['guest_group']) && count($_POST['guest_group']) >= 1) {
+            $this->guest_type = "Group Organiser";
+        }
+
+        //insert lead guest
+        $lead_guest = $db->prepare('INSERT INTO guest_list (guest_fname, guest_sname, guest_email, guest_address, guest_postcode, guest_rsvp_code, guest_rsvp_status,guest_extra_invites, guest_type) VALUES (?,?,?,?,?,?,?,?,?)');
+        $lead_guest->bind_param('sssssssis', $this->guest_fname, $this->guest_sname, $this->guest_email, $this->guest_address, $this->guest_postcode, $this->rsvp_code, $this->rsvp_status, $this->guest_extra_invites, $this->guest_type);
+        $lead_guest->execute();
+        $lead_guest->close();
+        $lead_guest_id = $db->insert_id; //last id entered
+
+        //add this guest to the event guest List they have been added to.
+        if (isset($_POST['event_id'])) {
+            $event_id = $_POST['event_id'];
+            $invite_rsvp_status = "Not Replied";
+            $invite = $db->prepare('INSERT INTO invitations (guest_id, event_id, invite_rsvp_status) VALUES (?,?,?)');
+            $invite->bind_param('iis', $lead_guest_id, $event_id, $invite_rsvp_status);
+            $invite->execute();
+            $invite->close();
+        }
+        //once the guest has been added, determine if the user has added other members to the lead guest.
+        if (isset($_POST['guest_group'])) {
+            //?insert each guest into the guest list from the POST request
+            //create a guest group if the guest being added has one or more extra invites
+            //set up a group name using first and last name of primary guest
+            $group_name = $this->guest_fname . ' ' . $this->guest_sname;
+            //insert into guest group tables
+            $group = $db->prepare('INSERT INTO guest_groups (guest_group_name, guest_group_organiser) VALUES (?,?)');
+            $group->bind_param('si', $group_name, $lead_guest_id);
+            $group->execute();
+            $group->close();
+            $new_group_id = $db->insert_id;
+            //update guest list with the guest group id
+            $guest = $db->prepare('UPDATE guest_list SET guest_group_id=?  WHERE guest_id =?');
+            $guest->bind_param('ii', $new_group_id, $lead_guest_id);
+            $guest->execute();
+            $guest->close();
+
+            //guest array for all new added guests at the time of making the guest
+            $guest_group = $_POST['guest_group'];
+            $guest_array = array();
+            $guest_type = "Member"; //only set as a member, these guests are a group member
+            $new_guest = $db->prepare('INSERT INTO guest_list (guest_fname, guest_sname, guest_rsvp_status, guest_type, guest_group_id) VALUES (?,?,?,?,?)');
+            foreach ($guest_group as $group_member) {
+                // if the plus one box has been ticked then add them as a plus one
+                $fname = $group_member['guest_fname'];
+                if (isset($group_member['plus_one']) && $group_member['plus_one'] == "plus_one") {
+                    $fname = $this->guest_fname . " " . $this->guest_sname . "'s +1";
+                }
+                $new_guest->bind_param('ssssi', $fname, $group_member['guest_sname'], $this->rsvp_status, $guest_type, $new_group_id);
+                $new_guest->execute();
+                //insert into an array for adding to the invites table
+                $new_guest_id = $db->insert_id;
+                array_push($guest_array, $new_guest_id);
+            }
+            $new_guest->close();
+            if (isset($_POST['event_id'])) {
+
+                /////Add to invites table for each guest 
+                $set_invites = $db->prepare('INSERT INTO invitations (guest_id, event_id, guest_group_id, invite_rsvp_status) VALUES (?,?,?,?)');
+                foreach ($guest_array as $guest) {
+                    $set_invites->bind_param('iiis', $guest, $event_id, $new_group_id, $this->rsvp_status);
+                    $set_invites->execute();
+                }
+
+                $set_invites->close();
+            }
+            //update the guest list with the amount of extra invites that they have based on how many guests have been added.
+
+            $guest_extra_invites = count($guest_array);
+            //update guest list with the guest group id
+            $guest = $db->prepare('UPDATE guest_list SET guest_extra_invites=?  WHERE guest_id =?');
+            $guest->bind_param('ii', $guest_extra_invites, $lead_guest_id);
+            $guest->execute();
+            $guest->close();
+            //update invitations with the lead guest group id as well
+            $lead_guest_inv = $db->prepare('UPDATE invitations SET guest_group_id=?  WHERE guest_id =?');
+            $lead_guest_inv->bind_param('ii', $new_group_id, $lead_guest_id);
+            $lead_guest_inv->execute();
+            $lead_guest_inv->close();
+            //only insert into invites table if the user has selected an event to add the guests to
+
+
+        }
+        $this->response_message = "Success";
+        $this->code = 200;
+        $this->response = json_encode(array("response_code" => $this->code, "response_message" => $this->response_message, "guest_name" => $this->guest_fname . ' ' . $this->guest_sname));
+        return $this->response;
+    }
+
+    function remove_guest()
+    {
+        //remove guest from Post request
+        db_connect($db);
+        //load current guest info
+        $q = $db->query("SELECT guest_fname, guest_sname, guest_type, guest_group_id FROM guest_list WHERE guest_id= " . $this->guest_id);
+        if ($q->num_rows > 0) {
+            $r = mysqli_fetch_assoc($q);
+            $this->guest_type = $r['guest_type'];
+            $this->guest_group_id = $r['guest_group_id'];
+            $this->guest_fname = $r['guest_fname'];
+            $this->guest_sname = $r['guest_sname'];
+        } else {
+            $this->response_message = "Guest Not found";
+            $this->code = 500;
+            $this->response = json_encode(array("response_code" => $this->code, "response_message" => $this->response_message, "guest_name" => $this->guest_fname . ' ' . $this->guest_sname));
+            return $this->response;
+        }
+
+        //update lead guest if this guest is a group member
+        $guest_extra_inv_num = $db->prepare('UPDATE guest_list SET guest_extra_invites=?  WHERE guest_id =?');
+        //remove user account if they have set one up
+        $remove_user = "DELETE FROM users WHERE guest_id=" . $this->guest_id;
+        if (!mysqli_query($db, $remove_user)) {
+            $this->response_message = "Script Error";
+            $this->code = 500;
+            $this->response = json_encode(array("response_code" => $this->code, "response_message" => $this->response_message, "guest_name" => $this->guest_fname . ' ' . $this->guest_sname));
+            return $this->response;
+        }
+        //remove any guests this user has made and if they are a group organiser
+        if ($this->guest_type == "Group Organiser") {
+            $remove_group_guests = "DELETE FROM guest_list WHERE guest_group_id=" . $this->guest_group_id;
+            if (mysqli_query($db, $remove_group_guests)) {
+                echo mysqli_error($db);
+            }
+        }
+        // connect to db and delete the guest
+        $remove_guest = "DELETE FROM guest_list WHERE guest_id=" . $this->guest_id;
+        if (mysqli_query($db, $remove_guest)) {
+            // find the new extra invites amount an update the lead guest
+            if ($this->guest_type == "Member") {
+                $guest_group_manager = $db->query("SELECT guest_group_organiser FROM guest_groups WHERE guest_group_id=" . $this->guest_group_id);
+                $guest_group_manager_res = $guest_group_manager->fetch_assoc();
+                $guest_org_id = $guest_group_manager_res['guest_group_organiser'];
+                $guest_group = $db->query("SELECT guest_id FROM guest_list WHERE guest_group_id=" . $this->guest_group_id . " AND guest_type='Member'");
+
+                $guest_extra_invites_num = $guest_group->num_rows;
+                $guest_extra_inv_num->bind_param('ii', $guest_extra_invites_num, $guest_org_id);
+                $guest_extra_inv_num->execute();
+                $guest_extra_inv_num->close();
+            }
+        }
+        $this->response_message = "Success";
+        $this->code = 200;
+        $this->response = json_encode(array("response_code" => $this->code, "response_message" => $this->response_message, "guest_name" => $this->guest_fname . ' ' . $this->guest_sname));
+        return $this->response;
+    }
+    function update_guest()
+    {
+        db_connect($db);
+        //make sure the required fields have been filled out and JS has not been altered
+        if (!trim($_POST['guest_fname'])) {
+            $this->code = 500;
+            $this->response_message = "First name is required";
+            $this->response = json_encode(array("response_code" => $this->code, "response_message" => $this->response_message));
+            return $this->response;
+            exit;
+        }
+        if (!trim($_POST['guest_sname'])) {
+            $this->code = 500;
+            $this->response_message = "Surname is required";
+            $this->response = json_encode(array("response_code" => $this->code, "response_message" => $this->response_message));
+            return $this->response;
+            exit;
+        }
+        //!determine variables
+        $this->guest_fname = mysqli_real_escape_string($db, $_POST['guest_fname']);
+        $this->guest_sname = mysqli_real_escape_string($db, $_POST['guest_sname']);
+        $this->guest_email = mysqli_real_escape_string($db, $_POST['guest_email']);
+        $this->guest_address = htmlspecialchars($_POST['guest_address']);
+        $this->guest_postcode = mysqli_real_escape_string($db, $_POST['guest_postcode']);
+        //Prepare Update guest 
+        $guest = $db->prepare('UPDATE guest_list SET guest_fname=?, guest_sname=?, guest_email=?, guest_rsvp_status=?, guest_address=?, guest_postcode=?  WHERE guest_id =?');
+        $guest->bind_param('ssssssi', $this->guest_fname, $this->guest_sname, $this->guest_email, $this->rsvp_status, $this->guest_address, $this->guest_postcode,  $this->guest_id);
+        $guest->execute();
+        $guest->close();
+        //update invites table
+        $invite_table = $db->prepare('UPDATE invitations SET invite_rsvp_status=?  WHERE guest_id =?');
+        $invite_table->bind_param('si', $this->rsvp_status, $this->guest_id);
+        $invite_table->execute();
+        $invite_table->close();
+        //once the guest has been updated, determine if the user has added other members to the lead guest.
+        //only set up a guest group if one is not present in the post request which would mean that the lead guest was a sole invite to start with
+        if (isset($_POST['guest_group']) && $_POST['guest_group_id'] == null) {
+            /////insert each guest into the guest list from the POST request
+            //create a guest group if the guest being added has one or more extra invites
+            //set up a group name using first and last name of primary guest
+            $group_name = $this->guest_fname . ' ' . $this->guest_sname;
+            //insert into guest group tables
+            $group = $db->prepare('INSERT INTO guest_groups (guest_group_name, guest_group_organiser) VALUES (?,?)');
+            $group->bind_param('si', $group_name, $this->guest_id);
+            $group->execute();
+            $group->close();
+            $new_group_id = $db->insert_id;
+            //change the lead guest to a group organsier
+            $guest_type = "Group Organiser";
+            //update guest list with the guest group id
+            $guest = $db->prepare('UPDATE guest_list SET guest_group_id=?, guest_type=?  WHERE guest_id =?');
+            $guest->bind_param('isi', $new_group_id, $guest_type,  $this->guest_id);
+            $guest->execute();
+            $guest->close();
+
+            //guest array for all new added guests at the time of making the guest
+            $guest_group = $_POST['guest_group'];
+            $guest_array = array();
+            $guest_type = "Member"; //only set as a member, these guests are a group member
+            $new_guest = $db->prepare('INSERT INTO guest_list (guest_fname, guest_sname, guest_type, guest_group_id, guest_rsvp_status) VALUES (?,?,?,?,?)');
+            foreach ($guest_group as $group_member) {
+                // if the plus one box has been ticked then add them as a plus one
+                $fname = $group_member['guest_fname'];
+                if (isset($group_member['plus_one']) && $group_member['plus_one'] == "plus_one") {
+                    $fname = $this->guest_fname . " " . $this->guest_sname . "'s +1";
+                }
+                $new_guest->bind_param('sssis', $fname, $group_member['guest_sname'], $guest_type, $new_group_id, $this->rsvp_status);
+                $new_guest->execute();
+                //insert into an array for adding to the invites table
+                $new_guest_id = $db->insert_id;
+                array_push($guest_array, $new_guest_id);
+            }
+            $new_guest->close();
+            if ($this->event_id>0) {
+                //!Add to invites table for each guest 
+                $set_invites = $db->prepare('INSERT INTO invitations (guest_id, event_id, invite_rsvp_status, guest_group_id) VALUES (?,?,?,?)');
+                foreach ($guest_array as $guest) {
+                    $set_invites->bind_param('iisi', $guest, $this->event_id, $this->rsvp_status, $new_group_id);
+                    $set_invites->execute();
+                }
+
+                $set_invites->close();
+            }
+            //update the guest list with the amount of extra invites that they have based on how many guests have been added.
+
+            $guest_extra_invites = count($guest_array);
+            //update guest list with the guest group id
+            $guest = $db->prepare('UPDATE guest_list SET guest_extra_invites=?  WHERE guest_id =?');
+            $guest->bind_param('ii', $guest_extra_invites, $this->guest_id);
+            $guest->execute();
+            $guest->close();
+            //only insert into invites table if the user has selected an event to add the guests to
+
+
+        }
+        //update the guest group with any guests that have been added and if this guest is a group organiser
+        if (isset($_POST['guest_group']) && $_POST['guest_group_id'] > 0) {
+
+            //guest array for all new added guests at the time of making the guest
+            $guest_group = $_POST['guest_group'];
+            $guest_array = array();
+            $guest_type = "Member"; //only set as a member, these guests are a group member
+            $new_guest = $db->prepare('INSERT INTO guest_list (guest_fname, guest_sname, guest_type, guest_group_id, guest_rsvp_status) VALUES (?,?,?,?,?)');
+            foreach ($guest_group as $group_member) {
+                // if the plus one box has been ticked then add them as a plus one
+                $fname = $group_member['guest_fname'];
+                if (isset($group_member['plus_one']) && $group_member['plus_one'] == "plus_one") {
+                    $fname = $this->guest_fname . " " . $this->guest_sname . "'s +1";
+                }
+                $new_guest->bind_param('sssis', $fname, $group_member['guest_sname'], $guest_type, $this->guest_group_id, $this->rsvp_status);
+                $new_guest->execute();
+                //insert into an array for adding to the invites table
+                $new_guest_id = $db->insert_id;
+                array_push($guest_array, $new_guest_id);
+            }
+            $new_guest->close();
+
+            //update the guest list with the amount of extra invites that they have based on how many guests have been added.
+            //count how many members exist and update the table
+            $guest_group = $db->query("SELECT guest_id FROM guest_list WHERE guest_group_id=" . $this->guest_group_id . " AND guest_type='Member'");
+
+            $guest_extra_invites = $guest_group->num_rows;
+            $guest_type = "Group Organiser";
+            //update guest list with the guest group id and make sure they are now a Group Organiser
+            $guest = $db->prepare('UPDATE guest_list SET guest_extra_invites=?, guest_group_id=?, guest_type=?  WHERE guest_id =?');
+            $guest->bind_param('iisi', $guest_extra_invites, $this->guest_group_id, $guest_type, $this->guest_id);
+            $guest->execute();
+            $guest->close();
+            //only insert into invites table if the user has selected an event to add the guests to
+            if ($this->event_id>0) {
+                //!Add to invites table for each guest 
+                $set_invites = $db->prepare('INSERT INTO invitations (guest_id, event_id, invite_rsvp_status, guest_group_id) VALUES (?,?,?,?)');
+                foreach ($guest_array as $member) {
+                    $set_invites->bind_param('iisi', $member, $this->event_id, $this->rsvp_status, $this->guest_group_id);
+                    $set_invites->execute();
+                }
+
+                $set_invites->close();
+            }
+
+        }
+        $this->code = 200;
+        $this->response_message="Guest Updated";
+        $this->response = json_encode(array("response_code" => $this->code, "response_message" => $this->response_message));
+        return $this->response;
+    }
+}
+
+if (isset($_POST['action']) && $_POST['action'] == "new_guest") {
+    $guest = new Guest;
+    echo $guest->create();
+}
+if (isset($_POST['action']) && $_POST['action'] == "remove_guest") {
+    $guest = new Guest;
+    echo $guest->remove_guest();
+}
+if (isset($_POST['action']) && $_POST['action'] == "update_guest") {
+    $guest = new Guest;
+    echo $guest->update_guest();
 }

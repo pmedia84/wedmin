@@ -5,40 +5,15 @@ if (isset($_GET['user_email'])) {
 }
 
 $user_id=0;
-include("./connect.php");
+
 include("inc/head.inc.php");
 include($_SERVER['DOCUMENT_ROOT'] . "/email_settings.php");
-require("../admin/scripts/functions.php");
-$cms = new Cms();
-if ($cms->type() == "Wedding") {
-    $cms->wedding_load();
-}
-if ($cms->type() == "Business") {
-    $cms->business_load();
-}
-if ($cms->type() == "Business") {
-    //look for the business set up and load information
-    //find business details.
-    $business = $db->prepare('SELECT * FROM business');
+require("scripts/functions.php");
+db_connect($db);
 
-    $business->execute();
-    $business->store_result();
-    $business->bind_result($business_id, $business_name, $address_id, $business_phone, $business_email, $business_contact_name);
-    $business->fetch();
-    $business->close();
-    //set cms name
-    $cms_name = $business_name;
-    //find user details for this business
-
-    //find business address details.
-    $business = $db->prepare('SELECT * FROM addresses WHERE address_id =' . $address_id);
-
-
-    
-}
 
 //run checks to make sure a wedding has been set up correctly
-if ($cms->type() == "Wedding") {
+
     //look for the Wedding set up and load information
     //find Wedding details.
     $wedding = $db->prepare('SELECT * FROM wedding');
@@ -56,35 +31,20 @@ if ($cms->type() == "Wedding") {
     $wedding_events_query = ('SELECT * FROM wedding_events ORDER BY event_time');
     $wedding_events = $db->query($wedding_events_query);
     $wedding_events_result = $wedding_events->fetch_assoc();
-}
+
+//page meta variables
+$meta_description = "Parrot Media - Wedding Admin Area";
+$meta_page_title = "Mi-Admin | Setup";
 ?>
-<!-- Meta Tags For Each Page -->
-<meta name="description" content="Parrot Media - Client Admin Area">
-<meta name="title" content="Manage your website content">
-<!-- /Meta Tags -->
+<!DOCTYPE html>
+<html lang="en">
 
-<!-- / -->
-<!-- Page Title -->
-<title>Mi-Admin | Reset Password</title>
-<!-- /Page Title -->
+<head>
+    <?php include("./inc/Page_meta.php"); ?>
 </head>
-
-<body>
-
-
-    <!-- Main Body Of Page -->
-
-
-
-    <main class="login-main">
-
-        <div class="header">
-
-            <div class="header-actions login-header">
-                <img src="assets/img/logo.png" alt="">
-            </div>
-        </div>
-        <div class="login-wrapper">
+    <main class="login">
+            <div class="login-wrapper">
+            <img src="assets/img/logo.png" alt="">
             <?php if (isset($_GET['action'])) :
                 //scripts for changing temporary passwords for new users
                 //find username and email address to display on screen.

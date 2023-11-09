@@ -1,0 +1,43 @@
+.tab-buttons {
+    overflow: hidden;
+    border: 1px solid $primary;
+    background-color: $primary-900;
+    margin-top: $spacer-2;
+    border-top-left-radius: $border-radius;
+    border-top-right-radius: $border-radius;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .tab-buttons button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    flex-grow: 1;
+  }
+  .tab-buttons button:hover {
+    background-color: $primary-950;
+  }
+  /* Create an active/current tablink class */
+.tab-buttons button.active {
+    background-color: $primary-800;
+  }
+  
+  /* Style the tab content */
+  .tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid $primary;
+    border-top: none;
+    animation: fadeEffect 1s;
+    border-bottom-left-radius: $border-radius;
+    border-bottom-right-radius: $border-radius;
+  }
+  @keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }

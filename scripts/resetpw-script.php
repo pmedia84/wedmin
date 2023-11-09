@@ -4,12 +4,13 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-require $_SERVER['DOCUMENT_ROOT'] . '/admin/mailer/PHPMailer.php';
-require $_SERVER['DOCUMENT_ROOT'] . '/admin/mailer/SMTP.php';
-require $_SERVER['DOCUMENT_ROOT'] . '/admin/mailer/Exception.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/wedmin/mailer/PHPMailer.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/wedmin/mailer/SMTP.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/wedmin/mailer/Exception.php';
 session_start();
 
-include("../connect.php");
+require("functions.php");
+db_connect($db);
 include($_SERVER['DOCUMENT_ROOT'] . "/email_settings.php");
 if (mysqli_connect_errno()) {
     // If there is an error with the connection, stop the script and display the error.
@@ -65,7 +66,7 @@ if ($_POST['action'] == 'requestreset') {
                 <div style="padding:16px; border: 10px solid #3b685c; border-radius: 10px;">
                     <h2>Follow the instructions below:</h2>
                     <p>Dear ' . $name . ', please click on the link below to reset your password</p>
-                    <strong><a href="https://'.$_SERVER['SERVER_NAME'].'/admin/resetpw.php?key=' . $key . '&user_id=' . $user_id . '&action=reset">Click Here</a></strong>
+                    <strong><a href="https://'.$_SERVER['SERVER_NAME'].'/wedmin/resetpw.php?key=' . $key . '&user_id=' . $user_id . '&action=reset">Click Here</a></strong>
                     <p><strong>Please Note:</strong>This email link will only last for 24 hours, after that time you will need to request another password reset.</p>
                     <br><hr style="color:#3b685c;">
                     <p>Kind regards</p>

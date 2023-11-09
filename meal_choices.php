@@ -16,18 +16,17 @@ foreach ($fetch as $line) {
     fputcsv($guestlist, $line);
 }
 fclose($guestlist);
-include("inc/head.inc.php");
 include("inc/settings.php");
 //select the orders first
 $choices_query = $db->query('SELECT meal_choice_order.choice_order_id, meal_choice_order.guest_id, guest_list.guest_fname, guest_list.guest_id, guest_list.guest_sname FROM meal_choice_order LEFT JOIN guest_list ON guest_list.guest_id=meal_choice_order.guest_id');
+//page meta variables
+$meta_description = "Parrot Media - Client Admin Area";
+$meta_page_title = "Mi-Admin | Meal Choices";
 ?>
-<!-- Meta Tags For Each Page -->
-<meta name="description" content="Parrot Media - Client Admin Area">
-<meta name="title" content="Manage your website content">
-<!-- /Meta Tags -->
-<!-- Page Title -->
-<title>Mi-Admin | Guest Meal Choices</title>
-<!-- /Page Title -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<?php include("./inc/Page_meta.php");?>
 </head>
 
 <body>

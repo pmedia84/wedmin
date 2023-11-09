@@ -4,13 +4,14 @@ require("scripts/functions.php");
 check_login();
 include("./connect.php");
 include("./inc/settings.php");
-include("./inc/head.inc.php");
+//page meta variables
+$meta_description = "Parrot Media - Client Admin Area";
+$meta_page_title = "Mi-Admin | CMS Settings";
 ?>
-<!-- Meta Tags For Each Page -->
-<meta name="description" content="Parrot Media - Client Admin Area">
-<meta name="title" content="Manage your website content">
-<title>Mi-Admin | Settings</title>
-<!-- /Page Title -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<?php include("./inc/Page_meta.php");?>
 </head>
 
 <body>

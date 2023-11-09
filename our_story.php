@@ -3,19 +3,16 @@ session_start();
 require("scripts/functions.php");
 check_login();
 include("connect.php");
-include("inc/head.inc.php");
 include("inc/settings.php");
+//page meta variables
+$meta_description = "Parrot Media - Client Admin Area";
+$meta_page_title = "Mi-Admin | News";
 ?>
-<!-- Meta Tags For Each Page -->
-<meta name="description" content="Parrot Media - Client Admin Area">
-<meta name="title" content="Manage your website content">
-<!-- /Meta Tags -->
-<!-- Tiny MCE -->
-<script src="https://cdn.tiny.cloud/1/7h48z80zyia9jc41kx9pqhh00e1e2f4pw9kdcmhisk0cm35w/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-<!-- / -->
-<!-- Page Title -->
-<title>Mi-Admin | Our Story</title>
-<!-- /Page Title -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<?php include("./inc/Page_meta.php");?>
+
 </head>
 <script>
     tinymce.init({

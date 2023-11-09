@@ -2,7 +2,6 @@
     //wraps table to make it responsive
     overflow-x: auto;
     max-width: 90vw;
-
     @media(min-width:$md) {
         max-width: 100%;
     }
@@ -10,21 +9,34 @@
 
 .std-table {
     //standard table settings
-
+    position: relative;
+    
     width: 100%;
-    margin-bottom: $spacer-3;
     border-collapse: collapse;
-
-    th {
+    thead{
+        border-bottom: 2px solid $primary;
+    }
+    th{
         text-align: left;
     }
-
-    td {
-        border-bottom: 1px solid $primary;
+    thead tr:hover{
+        background-color: transparent;
+    }
+    td, th {
+       padding: $spacer-2 $spacer-1;
     }
 
-    tr:nth-child(even) {
-        background-color: $primary-900;
+    tr {
+        border-bottom: 1px solid $primary;
+        transition: background-color 300ms ease-out;
+    }
+    tr:hover{
+        background-color: $primary-950;
+        transition: background-color 300ms ease-out;
+    }
+    tr:focus-within{
+        background-color: $primary-950;
+        transition: background-color 300ms ease-out;
     }
 
 }

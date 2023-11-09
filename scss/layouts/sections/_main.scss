@@ -1,11 +1,24 @@
 //Main admin page
 .main {
     position: relative;
+    min-height: 100dvh;
+    min-height: 100vh;
     display: grid;
-    gap: .5rem;
-    padding: .5rem;
+    grid-template-columns: 1fr;
+    /* justify-content: center; */
+    grid-template-rows: min-content 1fr min-content;
 }
-
+.header{
+    grid-column: 1/2;
+}
+.sidebar{
+    grid-column:1/2;
+    grid-row: 3/4;
+}
+.body{
+    grid-column: 1/2;
+    grid-row: 2/3;
+}
 .main-dashboard {
     //dashboard cards
     display: grid;
@@ -13,19 +26,23 @@
     padding: 1rem;
 }
 
-
 .main-cards {
     //container for cards
     background-color: $primary-900;
     padding: .5rem;
-    border-radius: $border-radius;
     display: grid;
     gap: 1rem;
     place-self: start;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+    &_header{
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+    }
 }
+//header div for main cards, contains page title and primary action buttons
 
 .cms-settings-cards {
     gap: 0;
@@ -34,20 +51,20 @@
 //settings for larger screens
 @media (min-width: $md) {
     .main {
-        grid-template-columns: 250px 1fr 250px;
-        grid-template-rows: auto auto auto auto 1fr;
-        grid-template-rows: min-content auto;
-        height: 100%;
-        flex-grow: 1;
-        place-self: auto;
-        padding: 1rem;
+        display: grid;
+        grid-template-columns: minmax(200px, 250px) 1fr 250px;
+        grid-template-rows: min-content auto min-content;
+
     }
 
     .header {
         grid-row: 1/2;
         grid-column: 1/4;
     }
-
+    .body{
+        grid-column: 2/3;
+        grid-row: 2/3;
+    }
     .main-dashboard {
         grid-row: 2/4;
         place-self: start;
@@ -58,14 +75,16 @@
 
     .nav-bar {
         grid-column: 1/2;
-        grid-row: 2/4;
+        grid-row: 2/3;
     }
 
-    .main-cards {
-        grid-row: 2/4;
+    .sidebar {
+        grid-row: 2/3;
         grid-column: 3/4;
         padding: 1rem;
-
+        height: 100%;
+        display: flex;
+        flex-direction: column;
         a {
             width: fit-content;
         }
@@ -81,11 +100,7 @@
 
     .col-2 {
         //changes the main to a 2 column layout
-        grid-template-columns: 250px 1fr;
-        grid-template-rows: min-content auto;
-
-
-
+        grid-template-columns: minmax(200px, 250px) 1fr;
     }
 
     .breadcrumbs {
@@ -96,5 +111,30 @@
 }
 
 .breadcrumbs{
-    margin-block: .5rem;
+    margin: .5rem;
+}
+//table filters use for guest list and other tables that require a filter
+
+.table-filter-header{
+    border-bottom: 1px solid $primary;
+    
+    display: flex;
+    gap: 1rem;
+    &_link{
+        padding: $spacer-1;
+        border: 1px solid transparent;
+        
+    }
+    &_link:first-of-type{
+        border-top-left-radius:5px;
+    }
+    &_link:last-of-type{
+        border-top-right-radius:5px;
+    }
+    &_link.active{
+        background-color: $primary-900;
+        border-right: 1px solid $primary;
+        border-left: 1px solid $primary;
+        border-top: 1px solid $primary;
+    }
 }

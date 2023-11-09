@@ -56,26 +56,20 @@ if ($cms->type() =="Wedding") {
     $wedding_events = $db->query($wedding_events_query);
     $wedding_events_result = $wedding_events->fetch_assoc();
 }
-//////////////////////////////////////////////////////////////////Everything above this applies to each page\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-include("inc/head.inc.php");
-
+//page meta variables
+$meta_description = "Parrot Media - Client Admin Area";
+$meta_page_title = "Mi-Admin | News";
 ?>
-<!-- Meta Tags For Each Page -->
-<meta name="description" content="Parrot Media - Client Admin Area">
-<meta name="title" content="Manage your website content">
-<!-- /Meta Tags -->
-
-<!-- / -->
-<!-- Page Title -->
-<title>Mi-Admin | Create News Article</title>
-<!-- /Page Title -->
-<!-- Tiny MCE -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<?php include("./inc/Page_meta.php");?>
 <script src="https://cdn.tiny.cloud/1/7h48z80zyia9jc41kx9pqhh00e1e2f4pw9kdcmhisk0cm35w/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-</head>
 <script>
     tinymce.init({
         selector: 'textarea#news_article_body',
         height: 500,
+
         plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
         toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat | ',
         tinycomments_mode: 'embedded',
@@ -92,6 +86,7 @@ include("inc/head.inc.php");
         ]
     });
 </script>
+</head>
 
 <body>
     <!-- Main Body Of Page -->

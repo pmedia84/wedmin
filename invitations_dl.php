@@ -26,23 +26,15 @@ foreach ($fetch as $line) {
   fputcsv($guestlist, $line);
 }
 fclose($guestlist);
-include("inc/head.inc.php");
 include("inc/settings.php");
-
-//////////////////////////////////////////////////////////////////Everything above this applies to each page\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-
-
+//page meta variables
+$meta_description = "Parrot Media - Client Admin Area";
+$meta_page_title = "Mi-Admin | Download Invites";
 ?>
-<!-- Meta Tags For Each Page -->
-<meta name="description" content="Parrot Media - Client Admin Area">
-<meta name="title" content="Manage your website content">
-<!-- /Meta Tags -->
-
-<!-- / -->
-<!-- Page Title -->
-<title>Mi-Admin | Invitation List</title>
-<!-- /Page Title -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<?php include("./inc/Page_meta.php");?>
 </head>
 
 <body>

@@ -29,15 +29,14 @@ if (isset($_GET['action']) && $_GET['action'] == "delete") {
 }
 $menu_courses = $db->query('SELECT course_name, course_id FROM menu_courses');
 $course_res = mysqli_fetch_assoc($menu_courses);
-include("inc/head.inc.php");
+//page meta variables
+$meta_description = "Parrot Media - Client Admin Area";
+$meta_page_title = "Mi-Admin | Menu Builder";
 ?>
-<!-- Meta Tags For Each Page -->
-<meta name="description" content="Parrot Media - Client Admin Area">
-<meta name="title" content="Manage your website content">
-<!-- /Meta Tags -->
-<!-- Page Title -->
-<title>Mi-Admin | Menu Builder</title>
-<!-- /Page Title -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<?php include("./inc/Page_meta.php");?>
 </head>
 
 <body>

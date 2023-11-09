@@ -1,15 +1,14 @@
 .header {
     //header panel with welcome message and header actions
-    color: $primary;
-    //margin-block: $spacer-2;
+    color: $primary-950;
+    background-color: $primary;
+    padding: 1rem $spacer-2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: $fs-125;
 }
 
-.header-actions {
-    //top banner with immediate actions for user
-    background-color: $primary-900;
-    border-radius: 10px;
-    padding: .25rem .5rem;
-}
 
 .header-actions-btn-section {
     //button container

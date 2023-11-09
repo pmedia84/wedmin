@@ -56,7 +56,7 @@
         }
         $new_guest->close();
         if(isset($_POST['event_id'])){
-            
+            $event_id= $_POST['event_id'];
             $invite_rsvp_status = "Not Replied";
             /////Add to invites table for each guest 
             $set_invites = $db->prepare('INSERT INTO invitations (guest_id, event_id, invite_rsvp_status, guest_group_id) VALUES (?,?,?,?)');
@@ -143,7 +143,7 @@
         $guest_extra_invites=0;
         //create and RSVP CODE
         $code = rand(1000,20000);
-        $code_name = mb_substr($_POST['guest_sname'],0,2);
+        $code_name = mb_substr($_POST['guest_sname'],0,1);
         $code_name = strtoupper($code_name);
         $guest_rsvp_code = $code_name . $code; // Generate random RSVP Code
         if(isset($_POST['guest_group']) && count($_POST['guest_group'])>=1){

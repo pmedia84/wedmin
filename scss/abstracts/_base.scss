@@ -1,25 +1,25 @@
-body{
-    background-image: 
-    radial-gradient(circle, 
-    #fefefe, #f4f4f4, #eaeaea, #e0e0e0,
-     #d6d6d6);
-     display: flex;
-     flex-direction: column;
+body {
+    background-color: #FAF9FA;
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
     min-height: -moz-available;
     min-height: -webkit-fill-available;
     min-height: stretch;
-    @media(min-width:$md){
+
+    @media(min-width:$md) {
         min-height: 100vh;
     }
- overscroll-behavior: none;
-    
+
+    overscroll-behavior: none;
+
 }
 
-a{
+a {
     color: $primary;
     display: inline-block;
-    &:hover{
+
+    &:hover {
         opacity: 0.8;
     }
 }

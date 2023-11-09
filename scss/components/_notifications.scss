@@ -20,3 +20,23 @@
     width: calc($fs * 2);
     height: calc($fs * 2);
 }
+
+//status pill, use svg circle and fill depending on the rsvp status
+.status-pill[data-rsvp="Attending"]{
+    .icon{
+        fill: $success;
+        stroke: $success;
+    }
+}
+.status-pill[data-rsvp="Not Replied"]{
+    .icon{
+        fill: $warning;
+        stroke: $warning;
+    }
+}
+.status-pill[data-rsvp="Not Attending"]{
+    .icon{
+        fill: $alert-primary;
+        stroke: $alert-primary;
+    }
+}

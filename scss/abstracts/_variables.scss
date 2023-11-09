@@ -2,6 +2,7 @@
 $primary:       #3b685c;
 $secondary:     hsl(162, 29%, 59%);
 $tertiary-col:  #4D4D4D;
+$accent: #1B3040;
 $white: #f2f2;
 $grey-600: gray;
 
@@ -16,7 +17,8 @@ $info:hsl(197, 71%, 47%);
 $info-300: hsl(197, 71%, 30%);
 $info-400: hsl(197, 71%, 40%);
 
-$success: hsl(164, 84%, 75%);
+$success: hsl(146, 84%, 75%);
+$warning:rgb(245, 234, 70);
 //Notifcation banner colors
 //Red for a color needing attention
 $red-primary: rgba(255, 0, 0, 0.406);

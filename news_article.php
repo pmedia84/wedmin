@@ -6,33 +6,6 @@ include("connect.php");
 include("inc/settings.php");
 $user=new User();
 
-////////////////Find details of the cms being used, on every page\\\\\\\\\\\\\\\
-//Variable for name of CMS
-//wedding is the name of people
-//business name
-$cms_name ="";
-$user_id = $_SESSION['user_id'];
-if ($cms->type() =="Business") {
-    //look for the business set up and load information
-    //find business details.
-    $business = $db->prepare('SELECT * FROM business');
-
-    $business->execute();
-    $business->store_result();
-    $business->bind_result($business_id, $business_name, $address_id, $business_phone, $business_email, $business_contact_name);
-    $business->fetch();
-    $business->close();
-    //set cms name
-    $cms_name = $business_name;
-    //find user details for this business
-    $business_users = $db->prepare('SELECT users.user_id, users.user_name, business_users.business_id, business_users.user_type FROM users NATURAL LEFT JOIN business_users WHERE users.user_id='.$user_id);
-
-    $business_users->execute();
-    $business_users->bind_result($user_id, $user_name,$business_id, $user_type);
-    $business_users->fetch();
-    $business_users->close();
-}
-
 //run checks to make sure a wedding has been set up correctly
 if ($cms->type() == "Wedding") {
     //look for the Wedding set up and load information
@@ -60,20 +33,15 @@ $article->store_result();
 //find news articles
 $news_query = ('SELECT * FROM news_articles WHERE news_articles_status="Published" ORDER BY news_articles_date LIMIT 3 ');
 $news = $db->query($news_query);
-include("inc/head.inc.php");
+//page meta variables
+$meta_description = "Parrot Media - Client Admin Area";
+$meta_page_title = "Mi-Admin | News";
 ?>
-<!-- Meta Tags For Each Page -->
-<meta name="description" content="Parrot Media - Client Admin Area">
-<meta name="title" content="Manage your website content">
-<!-- /Meta Tags -->
-
-<!-- / -->
-<!-- Page Title -->
-<title>Mi-Admin | News Posts</title>
-<!-- /Page Title -->
-<!-- Tiny MCE -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<?php include("./inc/Page_meta.php");?>
 <script src="https://cdn.tiny.cloud/1/7h48z80zyia9jc41kx9pqhh00e1e2f4pw9kdcmhisk0cm35w/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-</head>
 <script>
     tinymce.init({
         selector: 'textarea#news_article_body',
@@ -96,6 +64,7 @@ include("inc/head.inc.php");
     });
 </script>
 </head>
+
 
 
 <body>
